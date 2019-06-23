@@ -1,0 +1,62 @@
+{
+  "new_app.internal.das": {
+    "name": "new_app.internal.das",
+    "kind": "dns:hostname",
+    "type": "static",
+    "pools": [
+      { "name": "new_app-pool", "order": 0 },
+    ]
+  },
+  "new_app-pool": {
+    "name": "new_app-pool",
+    "kind": "dns:glbdn:pool",
+    "members": [ 
+      { "server": "new_app-virtual-server", "state": "available" }
+    ],
+    "monitor": "infoblox-f5-monitor"
+  },
+  "new_app-virtual-server": {
+    "name": "new_app-virtual-server",
+    "kind": "f5:ltm:vs",
+    "address": "30.128.52.91",
+    "port": 443,
+    "default_pool": "new_app-vs-default-pool",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "uri", "operation": "equals", "value": "/" }
+        ],
+        "actions": [ { "type": "redirect", "target": "/search" } ]
+      },
+      {
+        "conditions": [
+          { "type": "uri", "operation": "starts_with", "value": "/images" }
+        ],
+        "actions": [ { "type": "forward", "target": "new_app-vs-image-pool" } ]
+      }
+    ],
+    "additional_pools": [
+      "new_app-vs-image-pool"
+    ]
+  },
+  "new_app-vs-default-pool": {
+    "name": "new_app-vs-default-pool",
+    "kind": "f5:ltm:pool",
+    "monitor": "new_app-member-monitor",
+    "members": [
+      { "address": "30.128.1.23", "port": 443, "state": "available" },
+      { "address": "30.128.1.24", "port": 443, "state": "available" },
+      { "address": "30.128.1.25", "port": 443, "state": "unavailable" }
+    ]
+  },
+  "new_app-vs-image-pool": {
+    "name': "new_app-vs-image-pool",
+    "kind": "f5:ltm:pool",
+    "monitor": "new_app-http-monitor",
+    "members": [
+      { "address": "30.128.3.13", "port": 443, "state": "available" },
+      { "address": "30.128.3.14", "port": 443, "state": "disabled" },
+      { "address": "30.128.3.15", "port": 443, "state": "available" }
+    ]
+  }
+}
