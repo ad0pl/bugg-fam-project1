@@ -1,0 +1,69 @@
+{
+  "myapp.internal.das": {
+    "name": "myapp.internal.das",
+    "kind": "dns:hostname",
+    "type": "glbdn",
+    "pools": [
+      { "name": "myapp-primary-pool", "order": 0 },
+      { "name": "myapp-secondary-pool", "order": 1 }
+    ]
+  },
+  "myapp-primary-pool": {
+    "name": "myapp-primary-pool",
+    "kind": "dns:glbdn:pool",
+    "members": [ 
+      { "server": "myapp-primary-virtual-server", "state": "available" }
+    ],
+    "monitor": "infoblox-f5-monitor"
+  },
+  "myapp-secondary-pool": {
+    "name": "myapp-secondary-pool",
+    "kind": "dns:glbdn:pool",
+    "members": [
+      { "server": "myapp-secondary-virtual-server", "state": "available" }
+    ],
+    "monitor": "infoblox-f5-monitor"
+  },
+  "myapp-primary-virtual-server": {
+    "name": "myapp-primary-virtual-server",
+    "kind": "f5:ltm:vs",
+    "address": "30.128.52.91",
+    "port": 443,
+    "default_pool": "myapp-primary-vs-default-pool",
+    "rules": [
+    ],
+    "additional_pools": [
+    ]
+  },
+  "myapp-primary-vs-default-pool": {
+    "name": "myapp-primary-vs-default-pool",
+    "kind": "f5:ltm:pool",
+    "monitor": "myapp-member-monitor",
+    "members": [
+      { "address": "30.128.1.23", "port": 443, "state": "available" },
+      { "address": "30.128.1.24", "port": 443, "state": "available" },
+      { "address": "30.128.1.25", "port": 443, "state": "unavailable" }
+    ]
+  },
+  "myapp-secondary-virtual-server": {
+    "name": "myapp-secondary-virtual-server",
+    "kind": "f5:ltm:vs",
+    "address": "30.132.52.91",
+    "port": 443,
+    "default_pool": "myapp-secondary-vs-default-pool",
+    "rules": [
+    ],
+    "additional_pools": [
+    ]
+  },
+  "myapp-secondary-vs-default-pool": {
+    "name": "myapp-secondary-vs-default-pool",
+    "kind": "f5:ltm:pool",
+    "monitor": "myapp-member-monitor",
+    "members": [
+      { "address": "30.132.1.23", "port": 443, "state": "available" },
+      { "address": "30.132.1.24", "port": 443, "state": "available" },
+      { "address": "30.132.1.25", "port": 443, "state": "unavailable" }
+    ]
+  }
+}
